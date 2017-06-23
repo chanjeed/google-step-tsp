@@ -1,0 +1,119 @@
+#include<stdio.h>
+#include<string.h>
+#include<math.h>
+int n;
+
+struct POINT
+{
+	double x;
+	double y;
+} ;
+
+double calculate_distance(double x1,double y1,double x2,double y2)
+{
+	double dx=x1-x2;
+	double dy=y1-y2;
+	return sqrt(dx*dx+dy*dy);
+}
+
+double* make_distance_matrix(struct POINT point[])
+{
+	double* distance_matrix=(double *)malloc(n*n*sizeof(double));
+	int i,j;
+	
+	for(i=0;i<n;i++)
+	{
+		for(j=0;j<n;j++)
+		{
+			distance_matrix[i][j]=calculate_distance(point[i].x,point[i].y,point[j].x,point[j].y);
+		}
+	}
+	return distance_matrix;
+}
+
+int find_min_next(double distance_matrix[][],int visited[],int current_city)
+{
+	double min_distance=9999999;
+	int min_city;
+	int next_city;
+	int n=len(visited);
+	for(next_city=0;next_city<n;next_city++)
+	{
+		if(distance_matrix[current_city][next_city]<min_distance && visited[next_city]=0){
+
+			min_distance=distance_matrix[current_city][next_city];
+			min_city=next_city;
+		}
+	}
+	return min_city;
+}
+
+int* tsp(double distance_matrix[][],int n)
+{
+	int current_city,next_city;
+	int visited[n];
+	int* answer_path=(int *)malloc(n*sizeof(int));
+	int index_path=0;
+	for(int i=1;i<n;i++)
+	{
+		visited[i]=0;
+	}
+	visited[0]=1;  //Marked that insert in Set 
+	current_city=0;
+	answer_path[0]=0;
+	while(index_path<n)
+	{
+		next_city=find_min_next(distance_matrix,visited,current_city);
+		visited[next_city]=1;
+		answer_path[index_path]=next_city;
+		index_path+=1;
+	}
+	answer_path[index_path]=-1;  // Marked end
+	return answer_path;
+
+}
+
+void output(char file_name[],int answer_path[])
+{
+	int i;
+	FILE *f=fopen(file_name,"w");
+	fprintf(f,"index\n");
+	for(i=0;answer_path[i]!=-1;i++)
+	{
+		fprintf(f,"%d\n",answer_path[i]);
+	}
+	fclose(f);
+}
+
+void input(char file_name[])
+{
+	int* answer_path=(int *)malloc(n*sizeof(int));
+	double x,y;
+	int i=0;
+	FILE *f=fopen(file_name,"r");
+	double* distance_matrix=(double *)malloc(n*n*sizeof(double));
+	while(fscanf(f,"%f\t%f\n",&x,&y)!=EOF)
+	{
+		
+		struct POINT point[n];
+		point[i].x=x;
+		point[i].y=y;
+		i++;
+	}
+	
+	distance_matrix=make_distance_matrix(point);
+	answer_path=tsp(distance_matrix,n);
+	return answer_path;
+}
+
+int main(){
+	int* answer_path=(int *)malloc(n*sizeof(int));
+	char input_file[50],output_file[50];
+	double* distance_matrix=(double *)malloc(n*n*sizeof(double));
+	printf("input file:");
+	scanf("%s\n",input_file);
+	answer_path=input(input_file);
+	output(output_file,answer_path);
+	return 0;
+	
+}
