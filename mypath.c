@@ -92,7 +92,7 @@ int find_leftup_city(struct POINT point[],struct POS pos)
 	return min_city;
 }
 
-int divide(struct POINT point[],struct POS pos,int current_city,int count)
+int divide(struct POINT point[],struct POS pos,int current_city,char op,int count)
 {
 	int i;
 	double middle_x=(pos.left+pos.right)/2,middle_y=(pos.up+pos.down)/2;
@@ -145,11 +145,45 @@ int divide(struct POINT point[],struct POS pos,int current_city,int count)
 
 		leftdown.right=middle_x;
 		leftdown.up=middle_y;
-		current_city=divide(point,leftup,current_city,count+1);
-		current_city=divide(point,rightup,current_city,count+1);
+
+		if (op=='u')
+		{
+		current_city=divide(point,leftup,current_city,'q',count+1);
+		current_city=divide(point,rightup,current_city,'w',count+1);
 		
-		current_city=divide(point,rightdown,current_city,count+1);
-		current_city=divide(point,leftdown,current_city,count+1);
+		current_city=divide(point,rightdown,current_city,'s',count+1);
+		current_city=divide(point,leftdown,current_city,'a',count+1);
+		}
+		else if(op=='q')
+		{
+			current_city=divide(point,leftdown,current_city,'a',count+1);
+			current_city=divide(point,leftup,current_city,'q',count+1);
+			current_city=divide(point,rightup,current_city,'w',count+1);
+			current_city=divide(point,rightdown,current_city,'s',count+1);
+		}
+		else if(op=='w')
+		{
+			current_city=divide(point,leftdown,current_city,'a',count+1);
+			current_city=divide(point,leftup,current_city,'q',count+1);
+			current_city=divide(point,rightup,current_city,'w',count+1);
+			current_city=divide(point,rightdown,current_city,'s',count+1);			
+		}
+		else if(op=='s')
+		{
+			current_city=divide(point,rightup,current_city,'w',count+1);
+			current_city=divide(point,rightdown,current_city,'s',count+1);
+			current_city=divide(point,leftdown,current_city,'a',count+1);
+			current_city=divide(point,leftup,current_city,'q',count+1);
+
+		}
+		else if(op=='a')
+		{
+			current_city=divide(point,rightup,current_city,'w',count+1);
+			current_city=divide(point,rightdown,current_city,'s',count+1);
+			current_city=divide(point,leftdown,current_city,'a',count+1);
+			current_city=divide(point,leftup,current_city,'q',count+1);
+		}
+
 		
 		return current_city;
 	}
@@ -175,7 +209,7 @@ void tsp(struct POINT point[])
 	pos.right=max_x;
 	pos.up=min_y;
 	pos.down=max_y;
-	divide(point,pos,-1,1);
+	divide(point,pos,-1,'u',1);
 
 }
 
