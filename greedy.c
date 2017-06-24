@@ -5,7 +5,7 @@
 #include<assert.h>
 int n;
 double distance_matrix[2048][2048];
-int answer_path[2048],answer_path_best[2018];
+int answer_path[2048],answer_path_best[2048];
 double sum_distance=0;
 
 struct POINT
@@ -56,7 +56,7 @@ int find_min_next(int visited[],int current_city)
 	int next_city;
 	for(next_city=0;next_city<n;next_city++)
 	{
-		//printf("distance = %lf\n",distance_matrix[current_city][next_city]);
+		printf("distance = %lf\n",distance_matrix[current_city][next_city]);
 		if(distance_matrix[current_city][next_city]<min_distance && visited[next_city]==0){
 
 			min_distance=distance_matrix[current_city][next_city];
@@ -84,7 +84,7 @@ void tsp(int start_city)
 	{
 		current_city=next_city;
 		next_city=find_min_next(visited,current_city);
-		//printf("next city = %d\n",next_city);
+		printf("next city = %d\n",next_city);
 		visited[next_city]=1;
 		answer_path[index_path]=next_city;
 		index_path+=1;
@@ -146,8 +146,9 @@ void input(char file_name[])
 	while(1)
 	{	
 		ret=fscanf(f,"%lf,%lf\n",&x,&y);
+		printf("%d\n",ret);
 		if(ret==-1) break;  //end of file
-		//printf("%lf,%lf\n",x,y);
+		printf("%lf,%lf\n",x,y);
 		point[i].x=x;
 		point[i].y=y;
 		i++;

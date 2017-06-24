@@ -4,7 +4,7 @@
 #include<math.h>
 #include<assert.h>
 int n;
-const fix_count=10;
+const fix_count=8;
 double distance_matrix[2048][2048];
 int answer_path[2048];
 double sum_distance=0;
@@ -476,9 +476,9 @@ void input(char file_name[])
 	while(1)
 	{	
 		ret=fscanf(f,"%lf,%lf\n",&x,&y);
-		printf("%d\n",ret);
+		//printf("%d\n",ret);
 		if(ret==-1) break;  //end of file
-		printf("%lf,%lf\n",x,y);
+		//printf("%lf,%lf\n",x,y);
 		point[i].x=x;
 		point[i].y=y;
 		i++;

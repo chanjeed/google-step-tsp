@@ -434,10 +434,21 @@ int detect_intersect(double x1,double y1,double x2,double y2,double x3,double y3
 
 void swap(int path[],int x,int y)
 {
-	int temp;
-	temp=path[x];
-	path[x]=path[y];
-	path[y]=temp;
+	int temp[y-x+1],temp_index=0;
+	int k;
+	for(k=x;k<=y;k++)
+	{
+	//	printf("path[k] = %d\n",path[k]);
+		temp[temp_index]=path[k];
+		temp_index++;
+	}
+	
+	temp_index--;
+	for(k=x;k<=y;k++)
+	{
+		path[k]=temp[temp_index];
+		temp_index--;
+	}
 }
 void improve(struct POINT point[],int path[])
 {
