@@ -4,7 +4,7 @@
 #include<math.h>
 #include<assert.h>
 int n;
-const fix_count=5;
+const fix_count=10;
 double distance_matrix[2048][2048];
 int answer_path[2048];
 double sum_distance=0;
@@ -92,40 +92,29 @@ int find_leftup_city(struct POINT point[],struct POS pos)
 	return min_city;
 }
 
-int divide(struct POINT point[],struct POS pos,int current_city,int count)
+void divide(struct POINT point[],struct POS pos,int count)
 {
 	int i;
 	double middle_x=(pos.left+pos.right)/2,middle_y=(pos.up+pos.down)/2;
 	//printf("current_city = %d count = %d\n",current_city,count);
 	if(count==fix_count)
 	{
-		int next_city;
-		while(1)
+		for(i=0;i<n;i++)
 		{
-			if(current_city==-1)    // first city
+			if(visited[i]==0 && point[i].x>pos.left && point[i].x<pos.right &&
+				point[i].y>pos.up && point[i].y<pos.down )
 			{
-				next_city=find_leftup_city(point,pos);
+				visited[i]=1;
+				answer_path[index_path]=i;
+				if(index_path>0)
+				{
+					sum_distance+=distance_matrix[answer_path[index_path-1]][answer_path[index_path]];
+				}
+				index_path++;
 			}
-			else
-			{
-				next_city=find_min_next(point,pos,current_city);
-			}
-			//printf("next city = %d\n",next_city);
-			if(next_city==-1) break;    //no other cities to visit
-			
-			visited[next_city]=1;
-			answer_path[index_path]=next_city;
-			
-			if(index_path>0) 
-			{
-				sum_distance+=distance_matrix[answer_path[index_path-1]][answer_path[index_path]];
-			}
-			index_path++;
-			
-			current_city=next_city;
 		}
 
-		return current_city;
+		
 	}
 	else
 	{
@@ -145,13 +134,13 @@ int divide(struct POINT point[],struct POS pos,int current_city,int count)
 
 		leftdown.right=middle_x;
 		leftdown.up=middle_y;
-		current_city=divide(point,leftup,current_city,count+1);
-		current_city=divide(point,rightup,current_city,count+1);
+		divide(point,leftup,count+1);
+		divide(point,rightup,count+1);
 		
-		current_city=divide(point,rightdown,current_city,count+1);
-		current_city=divide(point,leftdown,current_city,count+1);
+		divide(point,rightdown,count+1);
+		divide(point,leftdown,count+1);
 		
-		return current_city;
+		
 	}
 }
 
@@ -175,7 +164,7 @@ void tsp(struct POINT point[])
 	pos.right=max_x;
 	pos.up=min_y;
 	pos.down=max_y;
-	divide(point,pos,-1,1);
+	divide(point,pos,1);
 
 }
 

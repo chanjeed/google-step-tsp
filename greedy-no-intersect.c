@@ -5,7 +5,7 @@
 #include<assert.h>
 int n;
 double distance_matrix[2048][2048];
-int answer_path[2048],answer_path_best[2018];
+int answer_path[2048];
 double sum_distance=0;
 
 struct POINT
@@ -63,11 +63,50 @@ int find_min_next(int visited[],int current_city)
 			min_city=next_city;
 		}
 	}
-	sum_distance+=min_distance;
+	
 	return min_city;
 }
 
-void tsp(int start_city)
+int detect_intersect(double x1,double y1,double x2,double y2,double x3,double y3,double x4,double y4)
+{
+	double ta = (x3 - x4) * (y1 - y3) + (y3 - y4) * (x3 - x1);
+     double tb = (x3 - x4) * (y2 - y3) + (y3 - y4) * (x3 - x2);
+     double tc = (x1 - x2) * (y3 - y1) + (y1 - y2) * (x1 - x3);
+     double td = (x1 - x2) * (y4 - y1) + (y1 - y2) * (x1 - x4);
+     return tc * td < 0 && ta * tb < 0; 
+}
+
+
+        
+
+void swap(int path[],int x,int y)
+{
+	int temp;
+	temp=path[x];
+	path[x]=path[y];
+	path[y]=temp;
+}
+void improve(struct POINT point[],int path[])
+{
+	int i,j;
+	int count=0;
+	for(i=0;i<n-1;i++)
+	{
+		for(j=i+2;j<n-1;j++)
+		{
+			
+			if(detect_intersect(point[path[i]].x,point[path[i]].y,point[path[i+1]].x,point[path[i+1]].y,
+				point[path[j]].x,point[path[j]].y,point[path[j+1]].x,point[path[j+1]].y))
+			{
+				count++;
+				swap(path,i+1,j);
+			}
+		}
+	}
+	printf("found %d intersect\n",count);
+}
+
+void tsp(struct POINT point[])
 {
 	int current_city,next_city;
 	int visited[n],i;
@@ -76,9 +115,9 @@ void tsp(int start_city)
 	{
 		visited[i]=0;
 	}
-	visited[start_city]=1;  //Marked that insert in Set 
-	next_city=start_city;
-	answer_path[0]=start_city;
+	visited[0]=1;  //Marked that insert in Set 
+	next_city=0;
+	answer_path[0]=0;
 	index_path+=1;
 	while(index_path<n)
 	{
@@ -89,22 +128,24 @@ void tsp(int start_city)
 		answer_path[index_path]=next_city;
 		index_path+=1;
 	}
-	
-	
-	
 
-}
-
-void find_sum_distance()
-{
-	int i;
-	sum_distance=0;
-	for(i=1;i<n;i++)
+	int copy_answer_path[n];
+	for(i=0;i<n;i++)
 	{
-			
-			sum_distance+=distance_matrix[answer_path[i-1]][answer_path[i]];
+
+		copy_answer_path[i]=answer_path[i];
+	//	printf("%d\n",copy_answer_path[i]);
 	}
-	sum_distance+=distance_matrix[answer_path[i-1]][answer_path[0]];
+	improve(point,copy_answer_path);
+	improve(point,copy_answer_path);
+	improve(point,copy_answer_path);
+	improve(point,copy_answer_path);
+	for(i=0;i<n;i++)
+	{
+		answer_path[i]=copy_answer_path[i];
+	}
+
+
 }
 
 void output(char file_name[])
@@ -114,19 +155,16 @@ void output(char file_name[])
 	fprintf(f,"index\n");
 	for(i=0;i<n;i++)
 	{
-		fprintf(f,"%d\n",answer_path_best[i]);
+		fprintf(f,"%d\n",answer_path[i]);
+		if(i>0)
+		{
+			sum_distance+=distance_matrix[answer_path[i-1]][answer_path[i]];
+		}
 	}
-	
+	printf("fclose\n");
 	fclose(f);
-}
-
-void copy_path()
-{
-	int i;
-	for(i=0;i<n;i++)
-	{
-		answer_path_best[i]=answer_path[i];
-	}
+	sum_distance+=distance_matrix[answer_path[i-1]][answer_path[0]];
+	printf("sum distance = %lf\n",sum_distance);
 }
 
 void input(char file_name[])
@@ -146,8 +184,9 @@ void input(char file_name[])
 	while(1)
 	{	
 		ret=fscanf(f,"%lf,%lf\n",&x,&y);
+		printf("%d\n",ret);
 		if(ret==-1) break;  //end of file
-		//printf("%lf,%lf\n",x,y);
+		printf("%lf,%lf\n",x,y);
 		point[i].x=x;
 		point[i].y=y;
 		i++;
@@ -158,18 +197,9 @@ void input(char file_name[])
 	make_distance_matrix(point);
 	printf("finish make distance_matrix\n");
 	//check_distance_matrix();
-	double min_sum_distance=999999;
-	for(i=0;i<n;i++)
-	{
-		tsp(i);
-		find_sum_distance();
-		if(sum_distance<min_sum_distance)
-		{
-			min_sum_distance=sum_distance;
-			copy_path();
-		}
-	}
-	printf("Best distance = %lf\n",min_sum_distance);
+	tsp(point);
+	printf("finish tsp()\n");
+	
 }
 
 int main(){
@@ -182,7 +212,6 @@ int main(){
 	input(input_file);
 	printf("output file:");
 	scanf("%s",output_file);	
-	
 	output(output_file);
 	
 	

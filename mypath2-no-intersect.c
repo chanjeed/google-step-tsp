@@ -4,7 +4,7 @@
 #include<math.h>
 #include<assert.h>
 int n;
-const fix_count=10;
+const fix_count=5;
 double distance_matrix[2048][2048];
 int answer_path[2048];
 double sum_distance=0;
@@ -115,11 +115,7 @@ int divide(struct POINT point[],struct POS pos,int current_city,char op,char fro
 			
 			visited[next_city]=1;
 			answer_path[index_path]=next_city;
-			
-			if(index_path>0) 
-			{
-				sum_distance+=distance_matrix[answer_path[index_path-1]][answer_path[index_path]];
-			}
+		
 			index_path++;
 			
 			current_city=next_city;
@@ -420,6 +416,49 @@ int divide(struct POINT point[],struct POS pos,int current_city,char op,char fro
 }
 
 
+
+
+int detect_intersect(double x1,double y1,double x2,double y2,double x3,double y3,double x4,double y4)
+{
+	double x_12=x2-x1,y_12=y2-y1;
+	double x_34=x4-x3,y_34=y4-y3;
+	double x_23=x3-x2,y_23=y3-y2;
+	double x_24=x4-x2,y_24=y4-y2;
+	double x_41=x4-x1,y_41=y4-y1;
+	double x_42=x4-x2,y_42=y2-y4;
+
+	return ((x_12*y_23-y_12*x_23)*(x_12*y_24-y_12*x_24) <0 && 
+		(x_34*y_41-y_34*x_41)*(x_34*y_42-y_34*x_42) <0);
+	// if == intersect return 1
+}
+
+void swap(int path[],int x,int y)
+{
+	int temp;
+	temp=path[x];
+	path[x]=path[y];
+	path[y]=temp;
+}
+void improve(struct POINT point[],int path[])
+{
+	int i,j;
+	int count=0;
+	for(i=0;i<n-1;i++)
+	{
+		for(j=i+1;j<n-1;j++)
+		{
+			
+			if(i!=j && detect_intersect(point[path[i]].x,point[path[i]].y,point[path[i+1]].x,point[path[i+1]].y,
+				point[path[j]].x,point[path[j]].y,point[path[j+1]].x,point[path[j+1]].y))
+			{
+				count++;
+				swap(path,i+1,j);
+			}
+		}
+	}
+	printf("found %d intersect\n",count);
+}
+
 void tsp(struct POINT point[])
 {
 	int current_city,next_city;
@@ -441,9 +480,18 @@ void tsp(struct POINT point[])
 	pos.down=max_y;
 	divide(point,pos,-1,'u','q','q',1);
 
+	int copy_answer_path[n];
+	for(i=0;i<n;i++)
+	{
+		copy_answer_path[i]=answer_path[i];
+	}
+	improve(point,copy_answer_path);
+	for(i=0;i<n;i++)
+	{
+		answer_path[i]=copy_answer_path[i];
+	}
+
 }
-
-
 void output(char file_name[])
 {
 	int i;
@@ -452,6 +500,8 @@ void output(char file_name[])
 	for(i=0;i<n;i++)
 	{
 		fprintf(f,"%d\n",answer_path[i]);
+		if(i>0)
+			sum_distance+=distance_matrix[answer_path[i-1]][answer_path[i]];
 	}
 	fclose(f);
 	sum_distance+=distance_matrix[answer_path[i-1]][answer_path[0]];
